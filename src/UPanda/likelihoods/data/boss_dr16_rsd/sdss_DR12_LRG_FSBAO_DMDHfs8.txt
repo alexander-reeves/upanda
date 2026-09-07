@@ -1,0 +1,11 @@
+# BOSS DR12 LRG: two redshift bins z_eff=0.38 and z_eff=0.51
+# Columns: z_eff  value  quantity
+# Source: https://svn.sdss.org/public/data/eboss/DR16cosmo/tags/v1_0_1/likelihoods/BAO-plus/
+# Reference: Alam et al. 2021 (arXiv:2007.08991), Alam et al. 2017 BOSS DR12 (arXiv:1607.03155)
+# NOTE: Use only the first two z-bins (0.2<z<0.6); eBOSS LRG covers 0.6<z<1.0
+0.38 1.027e+01 DM_over_rs
+0.38 2.489e+01 DH_over_rs
+0.38 4.974e-01 f_sigma8
+0.51 1.338e+01 DM_over_rs
+0.51 2.243e+01 DH_over_rs
+0.51 4.590e-01 f_sigma8

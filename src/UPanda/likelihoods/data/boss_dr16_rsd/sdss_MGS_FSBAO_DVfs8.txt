@@ -1,0 +1,6 @@
+# MGS (Main Galaxy Sample, DR7): z_eff=0.15
+# Columns: z_eff  value  quantity
+# Source: https://svn.sdss.org/public/data/eboss/DR16cosmo/tags/v1_0_1/likelihoods/BAO-plus/
+# Reference: Alam et al. 2021 (arXiv:2007.08991), Ross et al. 2015 (arXiv:1409.3242)
+0.15 0.527256 f_sigma8
+0.15 4.508211 DV_over_rs

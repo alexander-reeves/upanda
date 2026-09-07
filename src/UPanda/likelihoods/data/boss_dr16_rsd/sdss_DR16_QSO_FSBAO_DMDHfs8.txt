@@ -1,0 +1,7 @@
+# eBOSS DR16 QSO: z_eff=1.48
+# Columns: z_eff  value  quantity
+# Source: https://svn.sdss.org/public/data/eboss/DR16cosmo/tags/v1_0_1/likelihoods/BAO-plus/
+# Reference: Alam et al. 2021 (arXiv:2007.08991), Neveux et al. 2020 (arXiv:2007.08999)
+1.48 30.21 DM_over_rs
+1.48 13.23 DH_over_rs
+1.48  0.462 f_sigma8

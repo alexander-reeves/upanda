@@ -1,0 +1,4 @@
+# 2x2 covariance matrix for MGS: [f_sigma8, DV_over_rs]
+# Source: https://svn.sdss.org/public/data/eboss/DR16cosmo/tags/v1_0_1/likelihoods/BAO-plus/
+0.026621 0.002273
+0.002273 0.018302

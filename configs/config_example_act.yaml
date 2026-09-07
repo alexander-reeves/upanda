@@ -1,0 +1,66 @@
+fixed_cosmology_parameters:
+
+    - name: A_L
+      value: 1.0
+
+    - name: fEDE
+      value: 0.0
+
+    - name: thetai_scf
+      value: 2.0
+
+    - name:  log10z_c
+      value: 3.3
+
+    - name: m_nu
+      value: 0.02
+
+variable_cosmology_parameters:
+
+    - name: omega_cdm
+      prior_min: 0.05
+      prior_max: 0.255
+      distribution: flat
+      distribution_kwargs: {}
+
+    - name: omega_b
+      prior_min: 0.019
+      prior_max: 0.026
+      distribution: flat
+      distribution_kwargs: {}
+
+    - name: sigma8
+      prior_min: 0.3
+      prior_max: 1.3
+      distribution: flat
+      distribution_kwargs: {}
+
+    - name: n_s
+      prior_min: 0.84
+      prior_max: 1.1
+      distribution: flat
+      distribution_kwargs: {}
+
+    - name: h
+      prior_min: 0.40
+      prior_max: 0.82
+      distribution: flat
+      distribution_kwargs: {}
+
+    - name: tau
+      prior_min: 0.02
+      prior_max: 0.12
+      distribution: gaussian
+      distribution_kwargs: {"cov":0.000225, "mu":0.065}
+
+nuisance_parameters:
+    - name: yp2
+      prior_min: 0.9
+      prior_max: 1.1
+      distribution: flat
+
+    - name: A_planck
+      prior_min: 0.9
+      prior_max: 1.1
+      distribution: gaussian
+      distribution_kwargs: {'cov':0.00000625, 'mu':1.0}

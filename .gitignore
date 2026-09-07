@@ -1,0 +1,80 @@
+#heavy likelihood data 
+/src/UPanda/likelihoods/data/planck_pr4_hillipop*
+/src/UPanda/likelihoods/data/wmap*
+/src/UPanda/likelihoods/data/act_dr6_lensing/*
+/src/UPanda/likelihoods/data/camspec_pr4/*
+!/src/UPanda/likelihoods/data/camspec_pr4/README.md
+/CLAUDE.md
+# Notebook outputs
+notebooks/*.npy
+
+
+*.ipynb_checkpoints/
+*.py[co]
+__pycache__/
+
+# mypy
+.mypy_cache/
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+.DS_Store
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+*junit-*
+htmlcov
+
+# Translations
+*.mo
+
+# IDEs
+.mr.developer.cfg
+.project
+.pydevproject
+.settings
+.idea
+
+# Complexity
+output/*.html
+output/*/index.html
+
+# Documentation
+docs/_build
+site/
+
+# pytest
+.pytest_cache/
+
+# vim backup files
+.*.sw?
+
+# virtualenvs
+venv*
+
+# Local validation artifacts
+coverage.xml
+coverage.json
+junit.xml
+.ruff_cache/
+.venv/

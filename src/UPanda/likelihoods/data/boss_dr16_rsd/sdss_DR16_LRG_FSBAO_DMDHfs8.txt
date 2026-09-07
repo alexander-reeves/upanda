@@ -1,0 +1,7 @@
+# eBOSS DR16 LRG: z_eff=0.698 (combined CMASS+eBOSS LRG, 0.6<z<1.0)
+# Columns: z_eff  value  quantity
+# Source: https://svn.sdss.org/public/data/eboss/DR16cosmo/tags/v1_0_1/likelihoods/BAO-plus/
+# Reference: Alam et al. 2021 (arXiv:2007.08991), Bautista et al. 2021 (arXiv:2007.08993)
+0.698 17.645954975529154 DM_over_rs
+0.698 19.769664063200512 DH_over_rs
+0.698  0.4730038921505922 f_sigma8

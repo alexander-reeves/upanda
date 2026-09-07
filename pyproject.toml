@@ -1,0 +1,173 @@
+[build-system]
+# PEP 660 (editable installs) + modern PEP 621 metadata support
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "upanda"
+version = "0.2.0"
+description = "Rapid, differentiable cosmological parameter inference with neural-network emulators"
+readme = { file = "README.md", content-type = "text/markdown" }
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Alexander Reeves", email = "areeves@phys.ethz.ch" }]
+requires-python = ">=3.10"
+classifiers = [
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "Natural Language :: English",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering :: Astronomy",
+  "Topic :: Scientific/Engineering :: Physics",
+]
+
+dependencies = [
+    "astropy>=6.0.0",
+    "blackjax>=1.2.5",
+    "chaospy>=4.3.0",
+    "dynesty>=2.1.0",
+    "emcee>=3.1.6",
+    "flax>=0.10.7",
+    "h5py>=3.8.0",
+    # JAX CPU-only — install upanda[gpu] for CUDA acceleration
+    "jax>=0.4.0",
+    "jaxopt>=0.8.0",
+    "nautilus-sampler>=1.0.5",
+    "numpy>=1.23.5,<2.2.0",
+    "numpyro>=0.13.0",
+    "optax>=0.2.6",
+    "pooch>=1.8.0",
+    "pyyaml>=6.0",
+    "sacc>=1.0.0",
+    "scikit-learn>=1.3.0",
+    "scipy>=1.11.0",
+    "tensorflow>=2.15.0,<2.20.0",
+    "tensorflow-probability>=0.24.0",
+    "tqdm>=4.65.0",
+    "ultranest>=3.5.0",
+]
+
+[project.optional-dependencies]
+# GPU acceleration via CUDA 12 — install with: pip install upanda[gpu]
+gpu = [
+    "jax[cuda12]>=0.4.0",
+    "jax-cuda12-plugin>=0.4.0",
+]
+dev = [
+    "build",
+    "twine",
+    "pytest>=7.4",
+    "pytest-cov",
+    "tox",
+    "black>=24.0",
+    "isort",
+    "ruff",
+    "pre-commit",
+    "mkdocs>=1.5.0,<2",
+    "mkdocs-material>=9.5.0",
+    "mkdocstrings[python]>=0.24.0",
+    "pymdown-extensions>=10.7",
+]
+docs = [
+    "mkdocs>=1.5.0,<2",
+    "mkdocs-material>=9.5.0",
+    "mkdocstrings[python]>=0.24.0",
+    "pymdown-extensions>=10.7",
+]
+
+[project.urls]
+Source = "https://github.com/alexander-reeves/upanda"
+Documentation = "https://alexander-reeves.github.io/upanda/"
+Issues = "https://github.com/alexander-reeves/upanda/issues"
+
+# --- Setuptools package discovery (src layout) ---
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["UPanda*"]
+
+[tool.setuptools.package-data]
+"UPanda.likelihoods" = [
+    "data/desi_bao_dr2/*", "data/desi_bao_2024/*",
+    "data/boss_dr16_fsigma8/*", "data/boss_dr16_rsd/*", "data/union3/*",
+    "data/union31/*",
+    "data/pantheon_plus/*", "data/des_dovekie/*",
+    "data/planck_2018_highell/*", "data/planck_2018_lowl/*",
+    "data/planck_2018_lensing/*", "data/planck_pr4_lollipop/*",
+    "data/planck_sroll2_lowell_ee/*", "data/act_dr4/*", "data/act_dr6/*",
+    "data/KiDS_1000/*",
+]
+
+# --- Your existing tool configs kept as-is ---
+[tool.black]
+include = '\.pyi?$'
+exclude = '''
+(
+    \.eggs
+  | \.git
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | venv
+  | _build/
+  | build/
+  | dist
+)
+'''
+
+[tool.pytest.ini_options]
+addopts = "-v -ra --strict-markers"
+markers = [
+    "integration: requires external survey data or reference likelihood software",
+    "upstream: compares NumPy results directly with pinned upstream implementations",
+]
+pythonpath = ["src"]
+testpaths = ["tests"]
+filterwarnings = ["ignore:invalid"]
+
+[tool.coverage.run]
+source = ["UPanda"]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.tox]
+legacy_tox_ini = '''
+[tox]
+isolated_build = true
+envlist = py310,py311,py312
+
+[testenv]
+skip_install = false
+setenv =
+    JAX_PLATFORMS=cpu
+    JAX_ENABLE_X64=true
+    OMP_NUM_THREADS=1
+extras = dev
+allowlist_externals = pytest
+commands =
+    pytest --color=yes
+'''
+
+[tool.ruff.lint]
+# Existing wildcard backend imports are intentional. Start with correctness
+# checks; formatting-only churn would obscure the compatibility fixes.
+select = ["E9", "F821", "F822", "F823"]

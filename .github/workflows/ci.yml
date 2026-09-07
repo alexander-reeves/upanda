@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  JAX_PLATFORMS: cpu
+  JAX_ENABLE_X64: "true"
+  OMP_NUM_THREADS: "1"
+  OPENBLAS_NUM_THREADS: "1"
+  TF_NUM_INTRAOP_THREADS: "1"
+  TF_NUM_INTEROP_THREADS: "1"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e '.[dev]'
+      - run: >-
+          python -m pytest -m 'not upstream' --cov=UPanda --cov-fail-under=60
+          --cov-report=term-missing
+
+  upstream-numpy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e . pytest
+      - name: Install pinned upstream implementations
+        run: >-
+          python -m pip install
+          'cobaya @ git+https://github.com/CobayaSampler/cobaya.git@b76b6fed2a6c8c5594c6f92d5058bef10079746a'
+          'planck_2020_lollipop @ git+https://github.com/planck-npipe/lollipop.git@280a9c93d33bc6a058d6bf769ec82d9f7fdbd2b6'
+      - run: python -m pytest -m upstream tests/test_upstream_numpy.py
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install --upgrade build ruff twine
+      - run: python -m ruff check src/UPanda tests scripts
+      - run: python -m build
+      - run: python -m twine check dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distributions
+          path: dist/

@@ -1,0 +1,5 @@
+# 3x3 covariance matrix for eBOSS DR16 QSO: [DM_1.48, DH_1.48, fs8_1.48]
+# Source: https://svn.sdss.org/public/data/eboss/DR16cosmo/tags/v1_0_1/likelihoods/BAO-plus/
+0.62274104  0.01424418  0.0225684
+0.01424418  0.21952648 -0.00731532
+0.0225684  -0.00731532  0.00201957
