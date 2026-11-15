@@ -1,9 +1,10 @@
-"""Compare WMAP's default TT/TE kernels using real local survey data.
+"""Compare the WMAP TT and TE likelihood terms with pyWMAP on the real data.
 
-Pass --reference /path/to/pyWMAP/wmaplike/wmap.py from a trusted upstream
-checkout (reviewed revision c1adc0eca8551b87085c3eb1754c3d7d8d04faa0).
-Requires Cobaya and the separately provisioned UPanda WMAP data directory.
-The SZ template is tested separately: upstream also truncates it to integers.
+    python scripts/check_wmap_reference.py --reference /path/to/pyWMAP/wmaplike/wmap.py
+
+--reference is the source file of https://github.com/HTJense/pyWMAP (checked against revision c1adc0e).
+Needs cobaya and the WMAP data in src/UPanda/likelihoods/data/wmap. The SZ template is left out of the
+comparison because pyWMAP reads it as integers.
 """
 import argparse
 import importlib.util

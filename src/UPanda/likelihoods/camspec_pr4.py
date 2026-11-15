@@ -202,7 +202,9 @@ class camspec_pr4(Likelihood):
             np.ix_(np.concatenate(used_indices), np.concatenate(used_indices))
         ]
         self.cov = cov
-        self.covinv = linalg.inv(array(self.cov))
+        # numpy LAPACK inversion (~30 s for 9915^2); the JAX/XLA `inv` of a matrix this size took 40 min to
+        # COMPILE on CPU (2026-09-14), once per process. Numerically the same float64 result.
+        self.covinv = array(np.linalg.inv(self.cov))
 
         # foreground templates -------------------------------------------
         pivot = 1500

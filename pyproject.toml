@@ -70,13 +70,13 @@ dev = [
     "mkdocs>=1.5.0,<2",
     "mkdocs-material>=9.5.0",
     "mkdocstrings[python]>=0.24.0",
-    "pymdown-extensions>=10.7",
+    "pymdown-extensions>=10.7,<11",
 ]
 docs = [
     "mkdocs>=1.5.0,<2",
     "mkdocs-material>=9.5.0",
     "mkdocstrings[python]>=0.24.0",
-    "pymdown-extensions>=10.7",
+    "pymdown-extensions>=10.7,<11",
 ]
 
 [project.urls]
@@ -93,6 +93,7 @@ include = ["UPanda*"]
 "UPanda.likelihoods" = [
     "data/desi_bao_dr2/*", "data/desi_bao_2024/*",
     "data/boss_dr16_fsigma8/*", "data/boss_dr16_rsd/*", "data/union3/*",
+    "data/eboss_dr16_elg/*.npz", "data/eboss_dr16_elg/*.dat", "data/eboss_dr16_elg/README.txt",
     "data/union31/*",
     "data/pantheon_plus/*", "data/des_dovekie/*",
     "data/planck_2018_highell/*", "data/planck_2018_lowl/*",
@@ -122,7 +123,7 @@ exclude = '''
 addopts = "-v -ra --strict-markers"
 markers = [
     "integration: requires external survey data or reference likelihood software",
-    "upstream: compares NumPy results directly with pinned upstream implementations",
+    "reference: compares with cobaya or a collaboration's own likelihood code on real data",
 ]
 pythonpath = ["src"]
 testpaths = ["tests"]

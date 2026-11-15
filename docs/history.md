@@ -1,31 +1,31 @@
 # History
 
-## 0.2.0 — September 2026
+## Unreleased
 
-- Add the Union3.1/UNITY1.8 compressed-distance option and bundle its 22-bin data.
-- Add Union3 binned supernova distances and BOSS/eBOSS DR16 joint BAO+RSD and
-  approximate f-sigma8-only likelihoods, including data and source links.
-- Preserve public calls and historical emulator metadata layouts used by
-  `multiprobe_framework`.
-- Fix ACT N1 correction contraction, fiducial multipole indexing, spectrum
-  padding and batch handling. Preserve the trained emulator's normalization.
-- Restore JAX conversion of assembled LSS covariance matrices before replacing
-  official Planck or ACT lensing blocks; this fixes default ACT 5x2pt startup.
-- Fix covariance marginalization/compression, zero-weight handling, JAX binning
-  and foreground paths, immutable TensorFlow bias rescaling, and prior ordering.
-- Correct WMAP off-diagonal variance products, SZ template precision and JAX
-  diagonal updates; compare default TT/TE components directly with pyWMAP.
-- Expand numerical, backend, external-theory, persistence and gradient tests;
-  add reproducible comparisons with upstream likelihood code and a real emulator.
-- Document data provenance, numerical conventions and remaining validation gaps.
-- Consolidate packaging metadata, explicitly include bundled survey data, and
-  add strict documentation/build checks and full-package coverage reporting.
+- eBOSS DR16 ELG likelihoods from the official SDSS files: the one-dimensional fσ8 table and the
+  three-dimensional BAO + full-shape grid (`eboss_elg`), available through `boss_dr16_fsigma8` and
+  `boss_dr16_rsd`.
+- `boss_dr16_fsigma8` uses the published SDSS covariance by default; `additional_args={"diagonal": True}` gives the previous
+  behaviour. `boss_dr16_rsd.drop_fsigma8()` marginalises fσ8 for distance-only analyses.
+- `general_lss`: `act_lensing_range` selects the ACT DR6 lensing bandpowers (`all`, `baseline`, `extended`).
+- `run_mcmc` (emcee): chains are written to an HDF5 file while running and can be resumed; walkers can be
+  started from an existing chain.
+- `camspec_pr4`: the covariance is inverted with NumPy, which removes a 40 minute JAX compilation on CPU.
+- Tests against cobaya on the real data for DESI, SDSS, Pantheon+, Union3, DES-Dovekie, Planck 2018 plik-lite
+  and lensing, and against pyactlike for ACT DR4 (see [Validation](validation.md)).
 
-Some fixes change posterior values. Read the [likelihood audit](likelihood_audit.md)
-for the affected paths and scientific validation limits. This release does not
-claim complete test coverage or complete agreement with every upstream survey mode.
+## 0.2.0 (September 2026)
+
+- New likelihoods: Union3 and Union3.1, BOSS DR12 + eBOSS DR16 BAO and RSD.
+- ACT DR6 lensing: corrected the contraction of the N1 correction and the multipole indexing of the fiducial
+  spectrum.
+- WMAP: corrected the off-diagonal Fisher matrices and the SZ template.
+- HiLLiPoP, LoLLiPoP and CamSpec: fixes to covariance compression, binning and the JAX code paths.
+- DES-Dovekie: redshift cuts now marginalise over the removed supernovae.
+- Sampling: consistent parameter ordering with fixed parameters and grouped Gaussian priors.
+
+Some of these fixes change likelihood values with respect to 0.1.0.
 
 ## 0.1.0
 
-Initial package: cosmological likelihoods, integrated emulators, multiple sampler
-backends and NumPy/JAX support. Earlier work introduced the MkDocs documentation.
+First version: likelihoods, emulator classes (TensorFlow and JAX), samplers.

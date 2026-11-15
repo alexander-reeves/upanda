@@ -22,25 +22,44 @@ None yet. Want to be the first? See [Contributing](contributing.md)!
 If you use UPanda in your research, please cite:
 
 ```bibtex
-@article{reeves2023,
-    title={Neural network emulation for cosmological inference},
-    author={Reeves, Alexander and others},
-    journal={arXiv preprint arXiv:2309.03258},
-    year={2023}
+@article{Reeves:2023kjx,
+    author = "Reeves, Alexander and Nicola, Andrina and Refregier, Alexandre and Kacprzak, Tomasz and Valle, Luis Fernando Machado Poletti",
+    title = "{12 {\texttimes} 2 pt combined probes: pipeline, neutrino mass, and data compression}",
+    eprint = "2309.03258",
+    archivePrefix = "arXiv",
+    primaryClass = "astro-ph.CO",
+    doi = "10.1088/1475-7516/2024/01/042",
+    journal = "JCAP",
+    volume = "01",
+    pages = "042",
+    year = "2024"
 }
 
-@article{reeves2025a,
-    title={Fast parameter inference with JAX-accelerated emulators},
-    author={Reeves, Alexander and others},
-    journal={arXiv preprint arXiv:2502.01722},
-    year={2025}
+@article{Reeves:2025axp,
+    author = "Reeves, Alexander and Nicola, Andrina and Refregier, Alexandre",
+    title = "{Tuning the cosmic instrument: robust cosmology through combined probes}",
+    eprint = "2502.01722",
+    archivePrefix = "arXiv",
+    primaryClass = "astro-ph.CO",
+    doi = "10.1088/1475-7516/2025/06/042",
+    journal = "JCAP",
+    volume = "06",
+    pages = "042",
+    year = "2025"
 }
 
-@article{reeves2025b,
-    title={Differentiable cosmology for next-generation surveys},
-    author={Reeves, Alexander and others},
-    journal={arXiv preprint arXiv:2510.06114},
-    year={2025}
+@article{Reeves:2025xau,
+    author = "Reeves, Alexander and Ferraro, Simone and Nicola, Andrina and Refregier, Alexandre",
+    title = "{Multiprobe constraints on early and late time dark energy}",
+    eprint = "2510.06114",
+    archivePrefix = "arXiv",
+    primaryClass = "astro-ph.CO",
+    doi = "10.1103/w737-nk6r",
+    journal = "Phys. Rev. D",
+    volume = "113",
+    number = "10",
+    pages = "103512",
+    year = "2026"
 }
 ```
 

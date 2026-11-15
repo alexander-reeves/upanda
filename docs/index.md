@@ -54,9 +54,9 @@ If you have any suggestions or questions about **UPanda**, feel free to email me
 
 If you encounter any errors or problems with **UPanda**, please let me know!
 
-## Code Coverage
+## Validation
 
-Coverage is enforced by the [GitHub Actions CI workflow](https://github.com/alexander-reeves/upanda/actions/workflows/ci.yml). Run `make coverage` to generate local HTML and XML reports.
+Where a public reference exists (cobaya, or the collaboration's own code), each likelihood is tested against it on the real data. See [Validation](validation.md).
 
 ## Acknowledgments
 

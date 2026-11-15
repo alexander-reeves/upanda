@@ -1,13 +1,13 @@
 PYTHON ?= python
-.PHONY: help test tests test-all test-upstream coverage style-check reformat docs docs-serve build sdist
+.PHONY: help test tests test-all test-reference coverage style-check reformat docs docs-serve build sdist
 help:
-	@echo 'test/tests, test-all, test-upstream, coverage, style-check, reformat, docs, docs-serve, build, sdist'
+	@echo 'test/tests, test-all, test-reference, coverage, style-check, reformat, docs, docs-serve, build, sdist'
 test tests:
-	$(PYTHON) -m pytest tests
+	$(PYTHON) -m pytest -m 'not reference' tests
 test-all:
 	$(PYTHON) -m tox
-test-upstream:
-	$(PYTHON) -m pytest -m upstream tests/test_upstream_numpy.py
+test-reference:
+	$(PYTHON) -m pytest -m reference tests/test_reference.py
 coverage:
 	$(PYTHON) -m pytest --cov=UPanda --cov-report=term-missing --cov-report=html --cov-report=xml
 style-check:

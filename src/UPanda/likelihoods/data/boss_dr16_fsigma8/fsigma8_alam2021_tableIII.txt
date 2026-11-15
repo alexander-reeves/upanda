@@ -2,9 +2,11 @@
 # Source: Alam et al. 2021, Table III (arXiv:2007.08991), Phys. Rev. D 103, 083533
 # BAO+RSD combined consensus values; diagonal Gaussian approximation
 # Columns: z_eff  fsigma8  sigma
+# 2026-09-12: eBOSS LRG sigma 0.041 -> 0.0443 to match the official DR16 BAO-plus covariance
+#   (sdss_DR16_LRG_FSBAO_DMDHfs8_covtot); chains run before this date used 0.041.
 0.15   0.53    0.16
 0.38   0.497   0.045
 0.51   0.459   0.038
-0.70   0.473   0.041
+0.70   0.473   0.0443
 0.85   0.315   0.095
 1.48   0.462   0.045

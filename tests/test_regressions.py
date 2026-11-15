@@ -158,5 +158,5 @@ def test_boss_sample_generator_and_single_prediction():
         boss_dr16_rsd(samples=['missing'])
     like = boss_dr16_fsigma8()
     like.set_external_spectra({'boss_dr16_fsigma8_data': like.data_vector + .1})
-    expected = -.5 * .01 * np.diag(like.inv_cov).sum()
+    expected = -.5 * .01 * np.asarray(like.inv_cov).sum()   # the covariance is no longer diagonal
     np.testing.assert_allclose(like.compute_like(None), expected)

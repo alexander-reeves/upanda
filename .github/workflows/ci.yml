@@ -31,11 +31,13 @@ jobs:
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -e '.[dev]'
       - run: >-
-          python -m pytest -m 'not upstream' --cov=UPanda --cov-fail-under=60
+          python -m pytest -m 'not reference' --cov=UPanda --cov-fail-under=60
           --cov-report=term-missing
 
-  upstream-numpy:
+  reference:
     runs-on: ubuntu-latest
+    env:
+      COBAYA_PACKAGES_PATH: ${{ github.workspace }}/cobaya_packages
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -43,13 +45,19 @@ jobs:
           python-version: "3.10"
           cache: pip
       - run: python -m pip install --upgrade pip
-      - run: python -m pip install -e . pytest
-      - name: Install pinned upstream implementations
-        run: >-
+      - run: python -m pip install -e . pytest cobaya camb
+      - run: >-
           python -m pip install
-          'cobaya @ git+https://github.com/CobayaSampler/cobaya.git@b76b6fed2a6c8c5594c6f92d5058bef10079746a'
           'planck_2020_lollipop @ git+https://github.com/planck-npipe/lollipop.git@280a9c93d33bc6a058d6bf769ec82d9f7fdbd2b6'
-      - run: python -m pytest -m upstream tests/test_upstream_numpy.py
+          'pyactlike @ git+https://github.com/ACTCollaboration/pyactlike.git@1cac8c5d047bc2cad991890f2ebf1d8e3fb483b3'
+      - name: Install cobaya's BAO, supernova and Planck 2018 data
+        run: >-
+          cobaya-install bao.desi_dr2.desi_bao_all bao.desi_2024_bao_all
+          bao.sdss_dr16_baoplus_lrg bao.sdss_dr16_baoplus_qso bao.sdss_dr16_baoplus_elg
+          sn.pantheonplus sn.union3 sn.desdovekie
+          planck_2018_highl_plik.TTTEEE_lite_native planck_2018_lensing.CMBMarged
+          -p "$COBAYA_PACKAGES_PATH"
+      - run: python -m pytest -m reference tests/test_reference.py
 
   package:
     runs-on: ubuntu-latest

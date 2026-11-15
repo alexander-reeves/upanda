@@ -24,7 +24,7 @@ jobs:
           cache: pip
       - run: >-
           python -m pip install mkdocs-material 'mkdocstrings[python]'
-          pymdown-extensions
+          'pymdown-extensions<11'
       - run: python -m mkdocs build --strict
       - if: github.event_name == 'push'
         run: python -m mkdocs gh-deploy --force

@@ -47,19 +47,6 @@ jupyter notebook notebooks/
 
 4. Open any of the notebooks and run the cells!
 
-## What You'll Learn
-
-From these notebooks, you'll learn how to:
-
-- Set up and run cosmological parameter inference
-- Use JAX-accelerated neural network emulators
-- Configure different likelihoods (CMB, BAO, LSS)
-- Analyze MCMC chains and assess convergence
-- Combine multiple datasets
-- Use different samplers (emcee, nautilus, etc.)
-- Optimize parameters and find best-fit values
-- Create corner plots and visualizations
-
 ## Need Help?
 
 If you encounter issues running the notebooks or have questions:

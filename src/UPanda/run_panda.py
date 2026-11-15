@@ -243,6 +243,116 @@ def get_mcmc_start_and_fixed_params(
     return params_start.dtype, mcmc_start, cosmology_params_fixed
 
 
+def _start_from_chain(chain_file, names, n_walkers, lims, logl_cut=50.0, seed=0):
+    """Starting walkers drawn from an existing chain (a warm start) instead of the prior.
+
+    Takes n_walkers distinct samples of `chain_file` (a structured .npy with the columns `names`), after
+    dropping stuck walkers (log-likelihood more than `logl_cut` below the maximum, read from the sibling
+    loglikes_*.npy) and anything outside the prior box. Burn-in is then a few autocorrelation times
+    instead of the relaxation from a Sobol spread over the whole prior.
+    """
+    import os
+
+    chain = np.load(chain_file)
+    missing = [n for n in names if n not in chain.dtype.names]
+    if missing:
+        raise ValueError(f"init chain {chain_file} lacks parameters {missing}")
+    x = np.stack([np.asarray(chain[n], dtype=np.float64) for n in names], axis=1)
+    keep = np.ones(len(x), dtype=bool)
+    ll_file = os.path.join(os.path.dirname(chain_file), os.path.basename(chain_file).replace("chains_", "loglikes_", 1))
+    if os.path.exists(ll_file):
+        ll = np.load(ll_file)
+        if len(ll) == len(x):
+            keep &= ll >= ll.max() - logl_cut
+    keep &= np.all((x > lims[:, 0]) & (x < lims[:, 1]), axis=1)
+    x = np.unique(x[keep], axis=0)
+    if len(x) < n_walkers:
+        raise ValueError(f"init chain {chain_file} has only {len(x)} usable distinct samples for {n_walkers} walkers")
+    idx = np.random.default_rng(seed).choice(len(x), n_walkers, replace=False)
+    print(f"warm start: {n_walkers} walkers drawn from {len(x)} distinct samples of {chain_file}", flush=True)
+    return x[idx]
+
+
+def _run_emcee_backend(backend_file, fingerprint, x0, n_walkers, n_par, n_iter, thin,
+                       burn_in_frac, names, log_prob_fn, pool):
+    """emcee with a live HDF5 backend: the chain is on disk while it runs, and a killed or timed-out
+    job resumes where it stopped when resubmitted with the same arguments.
+
+    Only every `thin`-th step is stored (emcee thin_by), which is exactly the thinning the returned chain
+    has always used, so the file is n_walkers//4 times smaller than the full ensemble history. The
+    returned chain is flattened step-major like before (sample i belongs to walker i % n_walkers) after
+    discarding the first `burn_in_frac` of the stored steps.
+
+    Resume rule: an existing file is continued only if its recorded fingerprint, walker number,
+    dimension, thinning and parameter names all match this run; otherwise it is renamed
+    <file>.superseded-<time> and a fresh chain starts. A larger n_iter than before extends the chain.
+    """
+    import builtins
+    import os
+    import time
+
+    os.environ.setdefault("HDF5_USE_FILE_LOCKING", "FALSE")  # Lustre/GPFS; lets readers peek at a live file
+    import h5py
+
+    n_store = max(1, n_iter // thin)
+    meta = dict(fingerprint=str(fingerprint or ""), n_walkers=int(n_walkers), n_par=int(n_par),
+                thin=int(thin), param_names=",".join(names))
+    done = 0
+    if os.path.exists(backend_file):
+        try:
+            with h5py.File(backend_file, "r") as f:
+                old = {k: f.attrs.get(k) for k in meta}
+                done = int(f["mcmc"].attrs.get("iteration", 0)) if "mcmc" in f else 0
+            # builtins.all: this module's `from UPanda.module import *` shadows all/any/sum with the numpy
+            # versions, and numpy's all() of a generator is always True
+            match = builtins.all(str(old[k]) == str(v) for k, v in meta.items())
+        except Exception as e:  # noqa: BLE001
+            print(f"backend {backend_file} unreadable ({e!r}); starting fresh", flush=True)
+            match, done = False, 0
+        if not match or done == 0:
+            if match:
+                print("backend exists but holds no stored steps; starting fresh", flush=True)
+            else:
+                print(f"backend {backend_file} belongs to a different run: {old} vs {meta}", flush=True)
+            aside = f"{backend_file}.superseded-{time.strftime('%Y%m%d-%H%M%S')}"
+            os.rename(backend_file, aside)
+            print(f"moved it to {aside}", flush=True)
+            done = 0
+
+    backend = emcee.backends.HDFBackend(backend_file, name="mcmc")
+    if done == 0:
+        backend.reset(n_walkers, n_par)
+        with h5py.File(backend_file, "a") as f:
+            f.attrs.update(meta)
+            f.attrs["n_iter"] = int(n_iter)
+            f.attrs["burn_in_frac"] = float(burn_in_frac)
+    else:
+        with h5py.File(backend_file, "a") as f:
+            f.attrs["n_iter"] = int(max(n_iter, int(f.attrs.get("n_iter", 0))))
+
+    sampler = emcee.EnsembleSampler(nwalkers=n_walkers, ndim=n_par, log_prob_fn=log_prob_fn,
+                                    vectorize=True, pool=pool, backend=backend)
+    if done == 0:
+        print(f"live backend {backend_file}: fresh chain, {n_store} stored steps x thin {thin}", flush=True)
+        state = sampler.run_mcmc(initial_state=x0, nsteps=10, store=False, progress=True)
+    else:
+        print(f"live backend {backend_file}: RESUMING at stored step {done} of {n_store} "
+              f"(= {done * thin} of {n_store * thin} steps)", flush=True)
+        state = backend.get_last_sample()
+    if n_store > done:
+        sampler.run_mcmc(state, nsteps=n_store - done, thin_by=thin, progress=True)
+
+    rows = backend.iteration
+    discard = int(burn_in_frac * rows)
+    samples = backend.get_chain(flat=True, discard=discard)
+    lnprobs = backend.get_log_prob(flat=True, discard=discard)
+    try:
+        print("autocorr time [steps]", backend.get_autocorr_time(discard=discard, quiet=True) * thin, flush=True)
+    except Exception as e:  # noqa: BLE001
+        print("could not get autocorr time. Exception:", e, flush=True)
+    return samples, lnprobs
+
+
 def run_mcmc(
     total_emu_model_list=[],
     experiments_list=[],
@@ -257,6 +367,8 @@ def run_mcmc(
     log_dir=None,
     resume_un="subfolder",
     point_check=None,
+    backend_file=None,
+    backend_fingerprint=None,
 ):
     """
     Run MCMC sampling for parameter estimation.
@@ -281,6 +393,12 @@ def run_mcmc(
         log_dir (str, optional): Directory for logging
         resume_un (str, optional): Subfolder for resuming
         point_check (array, optional): Point or points to check loglike at
+        backend_file (str, optional): emcee only. Write the chain LIVE to this HDF5 file (every
+            n_walkers//4-th step, the thinning the returned chain uses anyway) instead of holding it in
+            memory until the end; the run then resumes from the file after a timeout or crash.
+        backend_fingerprint (str, optional): identifies the run (config + arguments). An existing
+            backend_file is resumed only if its fingerprint, walker number, dimension, thinning and
+            length all match; otherwise it is renamed *.superseded-<time> and a fresh chain starts.
     Returns:
         tuple: (Parameter chain, log probabilities)
     """
@@ -297,6 +415,9 @@ def run_mcmc(
     )
 
     params_names_list, lims = get_param_lims(conf)
+
+    if additional_args.get("init_chain"):
+        mcmc_start_x0 = _start_from_chain(additional_args["init_chain"], dtype.names, n_walkers, lims)
 
     gauss_priors = get_gaussian_priors(conf)
 
@@ -448,30 +569,34 @@ def run_mcmc(
 
         print("starting emcee sampler")
 
-        state = sampler_object.run_mcmc(
-            initial_state=mcmc_start_x0, nsteps=10, **kw_emcee
-        )
-        sampler_object.reset()
+        n_iter = int(ceil(n_samples / n_walkers))
+        thin = int(additional_args.get("thin") or max(1, n_walkers // 4))
+        if backend_file is not None:
+            samples, lnprobs = _run_emcee_backend(
+                backend_file, backend_fingerprint, mcmc_start_x0, n_walkers, n_par, n_iter, thin,
+                burn_in_frac, dtype.names, log_func_final, pool,
+            )
+        else:
+            state = sampler_object.run_mcmc(
+                initial_state=mcmc_start_x0, nsteps=10, **kw_emcee
+            )
+            sampler_object.reset()
 
-        sampler_object.run_mcmc(
-            state, nsteps=int(ceil(n_samples / n_walkers)), **kw_emcee
-        )
+            sampler_object.run_mcmc(state, nsteps=n_iter, **kw_emcee)
 
-        samples = sampler_object.get_chain(
-            flat=True,
-            discard=int(burn_in_frac * ceil(n_samples / n_walkers)),
-            thin=max(1, n_walkers // 4),
-        )
-        lnprobs = sampler_object.get_log_prob(
-            flat=True,
-            discard=int(burn_in_frac * ceil(n_samples / n_walkers)),
-            thin=max(1, n_walkers // 4),
-        )
+            samples = sampler_object.get_chain(
+                flat=True, discard=int(burn_in_frac * n_iter), thin=thin
+            )
+            lnprobs = sampler_object.get_log_prob(
+                flat=True, discard=int(burn_in_frac * n_iter), thin=thin
+            )
         samples = samples[:n_samples, :]
         lnprobs = lnprobs[:n_samples]
 
-        # try to get convergence information
+        # try to get convergence information (the live-backend path prints its own, from the file)
         try:
+            if backend_file is not None:
+                raise RuntimeError("reported by _run_emcee_backend")
             tau = sampler_object.get_autocorr_time()
             print("autocorr time", tau)
             print("tau", tau)

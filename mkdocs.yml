@@ -98,8 +98,9 @@ extra_javascript:
 nav:
   - Home: index.md
   - Installation: installation.md
-  - Usage and contracts: usage.md
+  - Usage: usage.md
   - Data sources: data_sources.md
+  - Validation: validation.md
   - Examples: examples.md
   - API Reference:
       - Likelihoods:
@@ -116,8 +117,6 @@ nav:
           - Utils: api/utils.md
   - Development:
       - Contributing: contributing.md
-      - Compatibility review: review.md
-      - Likelihood accuracy audit: likelihood_audit.md
       - Authors: authors.md
       - History: history.md
 

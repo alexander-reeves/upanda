@@ -292,6 +292,25 @@ class general_lss(Likelihood):
                 os.path.join(self.data_dir_act_lensing, "clkk_bandpowers_act.txt")
             )
 
+        # ACT DR6 lensing bandpower range, as in act_dr6_lenslike: "baseline" = bins [2:-6] (40 <= L <= 763),
+        # "extended" = bins [2:-3] (40 <= L <= 1300), "all" = all 18 bandpowers (the behaviour before 2026-10-06).
+        # Applied to the data, the binning matrix and the full covariance (before inversion); kaka is always last.
+        self.act_lensing_range = self.additional_args.get("act_lensing_range", "all")
+        if "kaka" in self.spectra:
+            act_slices = {"all": slice(None), "baseline": slice(2, -6), "extended": slice(2, -3)}
+            if self.act_lensing_range not in act_slices:
+                raise ValueError(f"act_lensing_range must be one of {list(act_slices)}, got {self.act_lensing_range}")
+            n_act = np.asarray(self.bin_mat_act).shape[0]
+            keep_act = np.arange(n_act)[act_slices[self.act_lensing_range]]
+            if keep_act.size != n_act:
+                n_tot = cov.shape[0]
+                keep = np.r_[np.arange(n_tot - n_act), n_tot - n_act + keep_act]
+                cov = cov[np.ix_(keep, keep)]
+                self.y_obs = self.y_obs[keep]
+                self.cl_hat_act = np.asarray(self.cl_hat_act)[keep_act]
+                self.bin_mat_act = np.asarray(self.bin_mat_act)[keep_act]
+            print(f"ACT DR6 lensing range '{self.act_lensing_range}': {keep_act.size} of {n_act} bandpowers")
+
         self.inv_C = array(np.linalg.inv(cov))
 
         # assert that inv cov @ cov = I

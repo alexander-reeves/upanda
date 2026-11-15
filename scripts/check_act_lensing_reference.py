@@ -1,13 +1,11 @@
-"""Compare ACT lensing using real data and a downstream integrated emulator.
-
-Run from an environment with UPanda, TensorFlow and JAX installed::
+"""Compare the ACT DR6 lensing likelihood with act_dr6_lenslike on the real data.
 
     python scripts/check_act_lensing_reference.py --emulator /path/to/kk_emu \
-        --reference /path/to/act_dr6_lenslike.py
+        --reference /path/to/act_dr6_lenslike/act_dr6_lenslike.py
 
-The reference file must be a trusted upstream ACT source file. Only its
-get_corrected_clkk function is evaluated. No datasets are downloaded or changed.
-The emulator is a trusted local UPanda model stem, without .pkl/_model.h5.
+--emulator is the file stem of a trained UPanda convergence-spectrum emulator (without .pkl / _model.h5) and
+--reference the source file of https://github.com/ACTCollaboration/act_dr6_lenslike, from which
+get_corrected_clkk is taken. Needs the ACT DR6 lensing data in src/UPanda/likelihoods/data/act_dr6_lensing.
 """
 import argparse
 import ast
